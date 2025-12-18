@@ -1,4 +1,7 @@
-const socket = io("http://localhost:5000");
+const socket = io(window.location.origin, {
+  transports: ["websocket", "polling"]
+});
+
 const token = localStorage.getItem("token");
 const myEmail = localStorage.getItem("email");
 const userEmailElem = document.getElementById("userEmail");
