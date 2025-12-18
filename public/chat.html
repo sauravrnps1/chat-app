@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatApp | Chatroom</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="sidebar">
+      <h3>ChatApp</h3>
+      <p id="userEmail"></p>
+      <h4>Chats</h4>
+      <ul id="chatList"></ul>
+
+      <input type="email" id="receiverEmail" placeholder="Enter user to chat with" />
+      <button id="loadChatBtn">Open Chat</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <div class="chat-box">
+      <div id="messages"></div>
+      <div class="input-group">
+        <input type="text" id="messageInput" placeholder="Type a message..." />
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

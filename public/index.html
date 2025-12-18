@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatApp | Login</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <h2>Welcome to ChatApp</h2>
+
+    <div class="form-group">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+    </div>
+
+    <div class="button-group">
+      <button id="loginBtn">Login</button>
+      <button id="signupBtn">Sign Up</button>
+    </div>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const apiBase = "http://localhost:5000/api/auth";
+
+    async function loginOrSignup(endpoint) {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
+
+      try {
+        const res = await fetch(`${apiBase}/${endpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        message.textContent = data.message;
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("email", email);
+          window.location.href = "chat.html";
+        }
+      } catch (err) {
+        message.textContent = err.message;
+      }
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", () => loginOrSignup("login"));
+    document.getElementById("signupBtn").addEventListener("click", () => loginOrSignup("signup"));
+  </script>
+</body>
+</html>
