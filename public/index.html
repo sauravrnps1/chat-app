@@ -24,7 +24,7 @@
   </div>
 
   <script>
-    const apiBase = "http://localhost:5000/api/auth";
+const apiBase = `${window.location.origin}/api/auth`;
 
     async function loginOrSignup(endpoint) {
       const email = document.getElementById("email").value;

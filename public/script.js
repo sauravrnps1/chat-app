@@ -11,7 +11,7 @@ const logoutBtn = document.getElementById("logoutBtn");
 
 let currentReceiver = null;
 async function loadConversations() {
-  const res = await fetch("http://localhost:5000/api/conversations", {
+  const res = await fetch(`${window.location.origin}/api/conversations`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const users = await res.json();
