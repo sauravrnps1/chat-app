@@ -6,24 +6,13 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"],
-  credentials: true
-}));
-
-
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: "*",       // allow all origins (safe for learning)
-    methods: ["GET", "POST"]
-  }
+  cors: { origin: "*" }, // allow all origins for now (safe in dev)
 });
-
 
 // --- Middlewares ---
 app.use(cors());
