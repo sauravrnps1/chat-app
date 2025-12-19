@@ -15,7 +15,20 @@ const io = new Server(server, {
 });
 
 // --- Middlewares ---
-app.use(cors());
+
+const allowedOrigins = [
+  "http://localhost:5000", // local
+  "http://localhost:3000", // just in case you test locally on 3000
+  "https://chat-app-63rs.onrender.com", // your Render domain
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.static("public")); // serve your frontend files
 
