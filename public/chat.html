@@ -15,18 +15,23 @@
       <h4>Chats</h4>
       <ul id="chatList"></ul>
 
-      <input type="email" id="receiverEmail" placeholder="Enter user to chat with" />
-      <button id="loadChatBtn">Open Chat</button>
+
       <button id="logoutBtn">Logout</button>
     </div>
 
     <div class="chat-box">
-      <div id="messages"></div>
-      <div class="input-group">
-        <input type="text" id="messageInput" placeholder="Type a message..." />
-        <button id="sendBtn">Send</button>
-      </div>
-    </div>
+  <div class="chat-header">
+    <h3 id="chatWith">Select a user to start chatting</h3>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="input-group">
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button id="sendBtn">Send</button>
+  </div>
+</div>
+
   </div>
 
   <script src="script.js"></script>

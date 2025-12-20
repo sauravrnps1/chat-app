@@ -44,6 +44,18 @@ body {
   flex-direction: column;
   background: white;
 }
+.chat-header {
+  background: #f8f9fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.chat-header h3 {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+}
 
 #messages {
   flex: 1;

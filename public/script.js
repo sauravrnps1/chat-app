@@ -1,3 +1,8 @@
+
+let currentReceiver = null;
+let unreadCounts = {}; // track unread message counts per user
+
+
 const socket = io(window.location.origin);
 
 const token = localStorage.getItem("token");
@@ -10,7 +15,7 @@ const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
-let currentReceiver = null;
+//let currentReceiver = null;
 async function loadConversations() {
   const [usersRes, unreadRes] = await Promise.all([
     fetch(`${window.location.origin}/api/users`, {
@@ -39,19 +44,28 @@ async function loadConversations() {
       li.appendChild(badge);
     }
 
-    li.addEventListener("click", () => {
-      receiverInput.value = user;
-      currentReceiver = user;
-      socket.emit("getMessages", user, (msgs) => {
-        messagesDiv.innerHTML = "";
-        msgs.forEach((m) =>
-          addMessage(m, m.sender === myEmail ? "sent" : "received")
-        );
-      });
+li.addEventListener("click", () => {
+  //receiverInput.value = user;
+  currentReceiver = user;
 
-      // Remove unread badge on open
-      if (li.querySelector(".unread-badge")) li.querySelector(".unread-badge").remove();
-    });
+  // Set chat header
+  document.getElementById("chatWith").textContent = user;
+
+  // Load chat history
+  socket.emit("getMessages", user, (msgs) => {
+    messagesDiv.innerHTML = "";
+    msgs.forEach((m) =>
+      addMessage(m, m.sender === myEmail ? "sent" : "received")
+    );
+  });
+
+  // Clear unread badge + count
+  unreadCounts[user] = 0;
+  if (li.querySelector(".unread-badge")) li.querySelector(".unread-badge").remove();
+});
+
+
+
 
     chatList.appendChild(li);
   });
@@ -72,20 +86,22 @@ loadConversations();
 
 // Handle receiving new messages
 socket.on("receiveMessage", (msg) => {
-  addMessage(msg, msg.sender === myEmail ? "sent" : "received");
+  // If we're currently chatting with this sender
+  if (currentReceiver === msg.sender) {
+    addMessage(msg, "received");
+    // Mark message as read immediately
+    fetch(`${window.location.origin}/api/unread`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(loadConversations);
+  } else {
+    // Not currently chatting — increment unread badge
+    unreadCounts[msg.sender] = (unreadCounts[msg.sender] || 0) + 1;
+    updateUnreadBadge(msg.sender);
+  }
 });
 
-// Load chat history
-loadChatBtn.addEventListener("click", () => {
-  const receiver = receiverInput.value.trim();
-  if (!receiver) return alert("Enter an email to chat with.");
-  currentReceiver = receiver;
 
-  socket.emit("getMessages", receiver, (msgs) => {
-    messagesDiv.innerHTML = "";
-    msgs.forEach((m) => addMessage(m, m.sender === myEmail ? "sent" : "received"));
-  });
-});
+
 
 // Send message
 sendBtn.addEventListener("click", () => {
@@ -112,6 +128,21 @@ function addMessage(msg, type) {
   div.textContent = msg.content;
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+function updateUnreadBadge(email) {
+  const chatItems = document.querySelectorAll("#chatList li");
+  chatItems.forEach((li) => {
+    const user = li.textContent.trim();
+    if (user === email) {
+      let badge = li.querySelector(".unread-badge");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.classList.add("unread-badge");
+        li.appendChild(badge);
+      }
+      badge.textContent = unreadCounts[email];
+    }
+  });
 }
 
 // Logout
