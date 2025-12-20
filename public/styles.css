@@ -49,24 +49,39 @@ body {
   flex: 1;
   padding: 15px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
-  padding: 8px 12px;
+  padding: 10px 15px;
   margin: 5px 0;
-  border-radius: 8px;
+  border-radius: 15px;
   max-width: 70%;
+  word-wrap: break-word;
 }
 
 .sent {
-  background: #8ecae6;
+  background-color: #8ecae6;
   align-self: flex-end;
+  text-align: right;
 }
 
 .received {
-  background: #dee2e6;
+  background-color: #dee2e6;
   align-self: flex-start;
+  text-align: left;
 }
+
+.unread-badge {
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 4px 8px;
+  margin-left: 10px;
+  font-size: 0.8em;
+}
+
 
 .input-group {
   display: flex;

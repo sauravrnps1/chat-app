@@ -71,12 +71,56 @@ app.get("/api/conversations", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+import User from "./models/User.js";
+import Message from "./models/Message.js";
+
+// Fetch all users except current user
+app.get("/api/users", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const currentEmail = decoded.email;
+
+    const users = await User.find({}, "email -_id"); // get only email field
+    const filteredUsers = users
+      .map((u) => u.email)
+      .filter((email) => email !== currentEmail);
+
+    res.json(filteredUsers);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/api/unread", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const currentEmail = decoded.email;
+
+    const unreadMessages = await Message.aggregate([
+      { $match: { receiver: currentEmail, isRead: false } },
+      { $group: { _id: "$sender", count: { $sum: 1 } } },
+    ]);
+
+    const unreadMap = {};
+    unreadMessages.forEach((u) => (unreadMap[u._id] = u.count));
+
+    res.json(unreadMap);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 // --- Socket.IO basic setup ---
 import jwt from "jsonwebtoken";
-import Message from "./models/Message.js";
-import User from "./models/User.js";
+
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -118,15 +162,24 @@ io.on("connection", (socket) => {
 
   // Provide chat history
   socket.on("getMessages", async (receiverEmail, callback) => {
-    const sender = socket.user;
-    const messages = await Message.find({
-      $or: [
-        { sender, receiver: receiverEmail },
-        { sender: receiverEmail, receiver: sender },
-      ],
-    }).sort({ createdAt: 1 });
-    callback(messages);
-  });
+  const sender = socket.user;
+
+  // mark unread messages as read
+  await Message.updateMany(
+    { sender: receiverEmail, receiver: sender, isRead: false },
+    { $set: { isRead: true } }
+  );
+
+  const messages = await Message.find({
+    $or: [
+      { sender, receiver: receiverEmail },
+      { sender: receiverEmail, receiver: sender },
+    ],
+  }).sort({ createdAt: 1 });
+
+  callback(messages);
+});
+
 
   socket.on("disconnect", () => {
     console.log("🔴 Disconnected:", socket.id);

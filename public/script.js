@@ -12,16 +12,33 @@ const logoutBtn = document.getElementById("logoutBtn");
 
 let currentReceiver = null;
 async function loadConversations() {
-  const res = await fetch(`${window.location.origin}/api/conversations`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const users = await res.json();
+  const [usersRes, unreadRes] = await Promise.all([
+    fetch(`${window.location.origin}/api/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    fetch(`${window.location.origin}/api/unread`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  ]);
+
+  const users = await usersRes.json();
+  const unreadMap = await unreadRes.json();
   const chatList = document.getElementById("chatList");
   chatList.innerHTML = "";
 
   users.forEach((user) => {
     const li = document.createElement("li");
+    li.classList.add("chat-user");
     li.textContent = user;
+
+    // Unread badge
+    if (unreadMap[user]) {
+      const badge = document.createElement("span");
+      badge.classList.add("unread-badge");
+      badge.textContent = unreadMap[user];
+      li.appendChild(badge);
+    }
+
     li.addEventListener("click", () => {
       receiverInput.value = user;
       currentReceiver = user;
@@ -31,10 +48,15 @@ async function loadConversations() {
           addMessage(m, m.sender === myEmail ? "sent" : "received")
         );
       });
+
+      // Remove unread badge on open
+      if (li.querySelector(".unread-badge")) li.querySelector(".unread-badge").remove();
     });
+
     chatList.appendChild(li);
   });
 }
+
 
 if (!token) {
   window.location.href = "index.html";
